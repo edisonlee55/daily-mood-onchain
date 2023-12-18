@@ -1,26 +1,26 @@
-import { ethers } from "hardhat";
+import { ethers } from 'hardhat';
+import dotenv from 'dotenv';
+dotenv.config();
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
+  const network = await ethers.provider.getNetwork();
+  const accounts = await ethers.getSigners();
 
-  const lockedAmount = ethers.parseEther("0.001");
+  const ownerAddress = await accounts[0].getAddress();
+  const allowedAddresses = ["0x0000000000000000000000000000000000000000"];
 
-  const lock = await ethers.deployContract("Lock", [unlockTime], {
-    value: lockedAmount,
+  console.log(`Deploying to network: ${network.name} (${network.chainId})`);
+  console.log(`Owner address: ${ownerAddress}`);
+  console.log(`Allowed addresses: ${allowedAddresses}`);
+
+  const dailyMood = await ethers.deployContract("DailyMood", [ownerAddress, allowedAddresses], {
+    deterministicDeployment: process.env.DETERMINISTIC_DEPLOYMENT || false
   });
 
-  await lock.waitForDeployment();
+  await dailyMood.waitForDeployment();
+  console.log(`DailyMood deployed to: ${dailyMood.target}`);
+};
 
-  console.log(
-    `Lock with ${ethers.formatEther(
-      lockedAmount
-    )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.target}`
-  );
-}
-
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
