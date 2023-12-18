@@ -1,0 +1,31 @@
+{
+  "name": "daily-mood-onchain",
+  "description": "Track your daily mood onchain",
+  "scripts": {
+    "clean": "rimraf artifacts cache typechain-types coverage coverage.json",
+    "test": "hardhat test",
+    "coverage": "hardhat coverage",
+    "build": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.ts --network",
+    "deploy:safe": "hardhat run scripts/deploy_safe.ts --network",
+    "console": "hardhat console --network",
+    "node": "hardhat node",
+    "verify": "hardhat verify --network"
+  },
+  "keywords": [
+    "ethereum",
+    "smart-contracts",
+    "hardhat",
+    "mood",
+    "solidity"
+  ],
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.2",
+    "rimraf": "^5.0.5"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.1",
+    "dotenv": "^16.3.1"
+  }
+}
