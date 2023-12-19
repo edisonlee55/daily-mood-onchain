@@ -8,7 +8,6 @@
     "coverage": "hardhat coverage",
     "build": "hardhat compile",
     "deploy": "hardhat run scripts/deploy.ts --network",
-    "deploy:safe": "hardhat run scripts/deploy_safe.ts --network",
     "console": "hardhat console --network",
     "node": "hardhat node",
     "verify": "hardhat verify --network"
