@@ -63,4 +63,15 @@ contract DailyMood is Ownable {
     function removeMoodByIndex(uint256 _index) public onlyAllowedAddresses {
         delete moods[msg.sender][_index];
     }
+
+    function ownerRemoveMoods(address _address) public onlyOwner {
+        delete moods[_address];
+    }
+
+    function ownerRemoveMoodByIndex(
+        address _address,
+        uint256 _index
+    ) public onlyOwner {
+        delete moods[_address][_index];
+    }
 }
