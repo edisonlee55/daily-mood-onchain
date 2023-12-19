@@ -1,12 +1,25 @@
 // SPDX-License-Identifier: MIT
+
+/*
+　　　　 　　 ＿＿
+　　　 　　／＞　　フ
+　　　 　　| 　_　 _ l
+　 　　 　／` ミ＿xノ
+　　 　 /　　　 　 |
+　　　 /　 ヽ　　 ﾉ
+　 　 │　　|　|　|
+　／￣|　　 |　|　|
+　| (￣ヽ＿_ヽ_)__)
+　＼二つ ​
+*/
+
 pragma solidity ^0.8.22;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract DailyMood is Ownable {
-    using EnumerableSet for EnumerableSet.AddressSet;
+import "./base/AllowedAddress.sol";
 
+contract DailyMood is Ownable, AllowedAddress {
     struct Mood {
         uint256 timestamp;
         string mood;
@@ -14,64 +27,72 @@ contract DailyMood is Ownable {
 
     mapping(address => Mood[]) private moods;
 
-    EnumerableSet.AddressSet private allowedAddresses;
-
     constructor(
         address initialOwner,
-        address[] memory _allowedAddresses
-    ) Ownable(initialOwner) {
-        for (uint i = 0; i < _allowedAddresses.length; i++) {
-            allowedAddresses.add(_allowedAddresses[i]);
-        }
+        address[] memory allowedAddresses
+    ) Ownable(initialOwner) AllowedAddress(allowedAddresses) {}
+
+    function addAllowedAddress(
+        address address_
+    ) public onlyOwner returns (bool success) {
+        return _addAllowedAddress(address_);
     }
 
-    modifier onlyAllowedAddresses() {
-        require(isAllowedAddress(msg.sender), "Address not allowed");
-        _;
+    function removeAllowedAddress(
+        address address_
+    ) public onlyOwner returns (bool success) {
+        return _removeAllowedAddress(address_);
     }
 
-    function isAllowedAddress(address _address) public view returns (bool) {
-        if (allowedAddresses.contains(address(0))) {
-            return true;
-        }
-        return allowedAddresses.contains(_address);
-    }
-
-    function addAllowedAddress(address _address) public onlyOwner {
-        allowedAddresses.add(_address);
-    }
-
-    function removeAllowedAddress(address _address) public onlyOwner {
-        allowedAddresses.remove(_address);
-    }
-
-    function getMoods(address _address) public view returns (Mood[] memory) {
-        return moods[_address];
+    function getMoodsLength(
+        address address_
+    ) public view returns (uint256 length) {
+        return moods[address_].length;
     }
 
     function getMoodByIndex(
-        address _address,
-        uint256 _index
-    ) public view returns (Mood memory) {
-        return moods[_address][_index];
+        address address_,
+        uint256 index
+    ) public view returns (uint256 timestamp, string memory mood) {
+        require(index < moods[address_].length, "Index out of bounds");
+        return (moods[address_][index].timestamp, moods[address_][index].mood);
     }
 
-    function pushMood(Mood memory _mood) public onlyAllowedAddresses {
-        moods[msg.sender].push(_mood);
+    function pushMood(string memory mood) public onlyAllowedAddress {
+        moods[msg.sender].push(Mood(block.timestamp, mood));
     }
 
-    function removeMoodByIndex(uint256 _index) public onlyAllowedAddresses {
-        delete moods[msg.sender][_index];
+    function updateMoodByIndex(
+        uint256 index,
+        string memory mood
+    ) public onlyAllowedAddress {
+        require(index < moods[msg.sender].length, "Index out of bounds");
+        moods[msg.sender][index].mood = mood;
     }
 
-    function ownerRemoveMoods(address _address) public onlyOwner {
-        delete moods[_address];
+    function removeMoods(address address_) public {
+        require(
+            (msg.sender == address_ && isAllowedAddress(msg.sender)) ||
+                msg.sender == owner(),
+            "Target address not allowed"
+        );
+
+        delete moods[address_];
     }
 
-    function ownerRemoveMoodByIndex(
-        address _address,
-        uint256 _index
-    ) public onlyOwner {
-        delete moods[_address][_index];
+    function removeMoodByIndex(address address_, uint256 index) public {
+        require(
+            (msg.sender == address_ && isAllowedAddress(msg.sender)) ||
+                msg.sender == owner(),
+            "Target address not allowed"
+        );
+
+        require(index < moods[address_].length, "Index out of bounds");
+
+        for (uint256 i = index; i < moods[address_].length - 1; i++) {
+            moods[address_][i] = moods[address_][i + 1];
+        }
+
+        moods[address_].pop();
     }
 }

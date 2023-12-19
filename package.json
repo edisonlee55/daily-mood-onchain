@@ -1,6 +1,7 @@
 {
   "name": "daily-mood-onchain",
   "description": "Track your daily mood onchain",
+  "version": "0.0.1",
   "scripts": {
     "clean": "rimraf artifacts cache typechain-types coverage coverage.json",
     "test": "hardhat test",
