@@ -16,7 +16,10 @@ abstract contract AllowedAddress {
 
     constructor(address[] memory allowedAddresses_) {
         for (uint256 i = 0; i < allowedAddresses_.length; i++) {
-            allowedAddressSet.add(allowedAddresses_[i]);
+            require(
+                allowedAddressSet.add(allowedAddresses_[i]),
+                "Duplicate address"
+            );
         }
     }
 

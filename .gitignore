@@ -76,3 +76,5 @@ certora_*
 
 # OpenZeppelin
 .openzeppelin/unknown-*.json
+
+.vscode

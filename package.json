@@ -21,7 +21,7 @@
   ],
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "hardhat": "^2.19.2",
+    "hardhat": "^2.19.3",
     "rimraf": "^5.0.5"
   },
   "dependencies": {

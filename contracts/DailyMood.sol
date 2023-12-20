@@ -27,6 +27,20 @@ contract DailyMood is Ownable, AllowedAddress {
 
     mapping(address => Mood[]) private moods;
 
+    modifier onlyAllowedSelfOrOwner(address address_) {
+        require(
+            (msg.sender == address_ && isAllowedAddress(msg.sender)) ||
+                msg.sender == owner(),
+            "Target address not allowed"
+        );
+        _;
+    }
+
+    modifier checkMoodIndex(address address_, uint256 index) {
+        require(index < moods[address_].length, "Index out of bounds");
+        _;
+    }
+
     constructor(
         address initialOwner,
         address[] memory allowedAddresses
@@ -53,8 +67,12 @@ contract DailyMood is Ownable, AllowedAddress {
     function getMoodByIndex(
         address address_,
         uint256 index
-    ) public view returns (uint256 timestamp, string memory mood) {
-        require(index < moods[address_].length, "Index out of bounds");
+    )
+        public
+        view
+        checkMoodIndex(address_, index)
+        returns (uint256 timestamp, string memory mood)
+    {
         return (moods[address_][index].timestamp, moods[address_][index].mood);
     }
 
@@ -65,30 +83,20 @@ contract DailyMood is Ownable, AllowedAddress {
     function updateMoodByIndex(
         uint256 index,
         string memory mood
-    ) public onlyAllowedAddress {
-        require(index < moods[msg.sender].length, "Index out of bounds");
+    ) public onlyAllowedAddress checkMoodIndex(msg.sender, index) {
         moods[msg.sender][index].mood = mood;
     }
 
-    function removeMoods(address address_) public {
-        require(
-            (msg.sender == address_ && isAllowedAddress(msg.sender)) ||
-                msg.sender == owner(),
-            "Target address not allowed"
-        );
-
+    function removeMoods(
+        address address_
+    ) public onlyAllowedSelfOrOwner(address_) {
         delete moods[address_];
     }
 
-    function removeMoodByIndex(address address_, uint256 index) public {
-        require(
-            (msg.sender == address_ && isAllowedAddress(msg.sender)) ||
-                msg.sender == owner(),
-            "Target address not allowed"
-        );
-
-        require(index < moods[address_].length, "Index out of bounds");
-
+    function removeMoodByIndex(
+        address address_,
+        uint256 index
+    ) public onlyAllowedSelfOrOwner(address_) checkMoodIndex(address_, index) {
         for (uint256 i = index; i < moods[address_].length - 1; i++) {
             moods[address_][i] = moods[address_][i + 1];
         }
